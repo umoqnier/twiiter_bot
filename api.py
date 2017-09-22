@@ -27,11 +27,12 @@ t_secretkey = 'YszgsQ0KgwaWKlooHPNSM9Mlh7uL4gsvfM1i1Jd9hB03e1MLAD'
 access_tokenkey = '632188701-8Eq3p0ohbQhZKKvFGQz1lRd41gNe90LfMblDM7Dy'
 access_tokensecret = 'ehFUrDFKcYhu0zgivsVVTCgr4RfZNmsTrMiw9sLATSj4w'
 
-
 auth = tweepy.OAuthHandler(t_consumerkey, t_secretkey)
 auth.set_access_token(access_tokenkey, access_tokensecret)
 
 api = tweepy.API(auth)
+
+menssage_es = "Parece ser que ésta noticia es falsa. Aquí tengo una recomendación para ti "
 
 
 @app.route('/twitter/')
@@ -41,60 +42,60 @@ def go_bots():
     hashtags: array
     macro_link: image_url
     tweet_text: string
-
     """
     args = request.args
-    article_links_array = args.getlist('article_links')  # Is what bots search on twitter to target people.
+    article_links_array = args.getlist('article_links')  # This is what bots search on twitter to target people
     hashtags_array = args.getlist('hashtags')  # Relevant hashtags
     macro_link = args['macro_link']  # Illustrative image to raise awareness
     tweet_text = args['tweet_text']  # Tweet text
 
     search_result_article = []
     search_result_hashtag = []
-    for article in article_links_array:
+    for article in article_links_array:  # TODO: identify false news by keywords
         search_result_article.append(api.search(article))
 
-    for hashtag in hashtags_array:
+    for hashtag in hashtags_array:  # TODO: identify false news by hashtags
         search_result_hashtag.append(api.search('#' + hashtag))
-    all_tweets_text = []
+
+    all_tweets_text = []  # List for output that tweets realized
 
     for tweets_a in search_result_article:
         for t in tweets_a:
             handle = "@" + t.user.screen_name
-            m_a = handle + " " + macro_link
+            m_a = menssage_es + " " + handle + " " + macro_link
             all_tweets_text.append(m_a)
-            s = api.update_status(m_a)
-            # nap = randint(1, 60)
-            time.sleep(50)
+            s = api.update_status(m_a)  # this send our recommendation
+            # nap = randint(1, 60)  # I don't know what's this
+            time.sleep(50)  # To avoid Twitter banning
 
     for tweets in search_result_hashtag:
         for tweet in tweets:
             handle = "@" + tweet.author.screen_name
-            m = handle + " " + macro_link
+            m = menssage_es + " " + handle + " " + macro_link
             all_tweets_text.append(m)
             # s = api.update_status(m)
             # nap = randint(1, 60)
-            time.sleep(50)
+            #time.sleep(50)
 
 ### Streaming part commented
 
     # name = 'bakerk200'
 
     # class StdOutListener(StreamListener):
-    # search_result2 = api.search(name)
+        # search_result2 = api.search(name)
 
-    # for t in search_result2:
-        # if(t.user.screen_name is name):
-        # handle2 = "@" + t.user.screen_name
-        # m2 = handle2 + " " + "good"
-        #####s2 = api.update_status(m2)
-        # nap = randint(1, 60)
-        # time.sleep(nap)
+        # for t in search_result2:
+            # if(t.user.screen_name is name):
+            # handle2 = "@" + t.user.screen_name
+            # m2 = handle2 + " " + "good"
+            #####s2 = api.update_status(m2)
+            # nap = randint(1, 60)
+            # time.sleep(nap)
 
-        # l = StdOutListener()
-        # stream = Stream(auth, l)
-        # print(search_result_article)
-        # print(search_result_hashtag)
+            # l = StdOutListener()
+            # stream = Stream(auth, l)
+            # print(search_result_article)
+            # print(search_result_hashtag)
 
     return jsonify({"tweets": all_tweets_text})
 
